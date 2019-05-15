@@ -177,3 +177,9 @@ variable "reader_dns_name" {
   description = "Name of the reader endpoint CNAME record to create in the parent DNS zone specified by `zone_id`. If left empty, the name will be auto-asigned using the format `replicas.var.name`"
   default     = ""
 }
+
+variable "allowed_security_groups_length" {
+  type        = "string"
+  description = "The number of security group IDs provided in the allowed_security_groups list"
+  default     = "0"
+}
