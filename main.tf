@@ -28,8 +28,12 @@ resource "aws_security_group_rule" "egress" {
   security_group_id = "${join("", aws_security_group.default.*.id)}"
 }
 
+locals {
+  allowed_security_groups = ["${var.allowed_security_groups}"]
+}
+
 resource "aws_security_group_rule" "ingress_security_groups" {
-  count                    = "${length(split(",", join(",", var.allowed_security_groups)))}"
+  count                    = "${length(local.allowed_security_groups)}"
   type                     = "ingress"
   description              = "Allow inbound traffic from existing Security Groups"
   from_port                = "${var.db_port}"
