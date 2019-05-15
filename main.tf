@@ -29,7 +29,7 @@ resource "aws_security_group_rule" "egress" {
 }
 
 resource "aws_security_group_rule" "ingress_security_groups" {
-  count                    = "${var.enabled == "true" ? length(var.allowed_security_groups) : 0}"
+  count                    = "${var.enabled == "true" ? length(split(",", join(",", var.allowed_security_groups))) : 0}"
   type                     = "ingress"
   description              = "Allow inbound traffic from existing Security Groups"
   from_port                = "${var.db_port}"
