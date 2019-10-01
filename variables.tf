@@ -184,3 +184,8 @@ variable "allowed_security_groups_length" {
   default     = "0"
 }
 
+
+variable "aws_region" {
+    type = string
+    description = "AWS region to deploy resources to."
+}
