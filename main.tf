@@ -12,7 +12,8 @@ terraform {
 }
 
 module "label" {
-  source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.7.0"
+  source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.15.0"
+#   source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.7.0"
   namespace  = var.namespace
   name       = var.name
   stage      = var.stage
@@ -137,7 +138,8 @@ locals {
 }
 
 module "dns_master" {
-  source    = "git::https://github.com/cloudposse/terraform-aws-route53-cluster-hostname.git?ref=tags/0.2.6"
+  source    = "git::https://github.com/cloudposse/terraform-aws-route53-cluster-hostname.git?ref=tags/0.3.0"
+#   source    = "git::https://github.com/cloudposse/terraform-aws-route53-cluster-hostname.git?ref=tags/0.2.6"
   enabled   = var.enabled == "true" && length(var.zone_id) > 0 ? "true" : "false"
   namespace = var.namespace
   name      = local.cluster_dns_name
@@ -147,7 +149,8 @@ module "dns_master" {
 }
 
 module "dns_replicas" {
-  source    = "git::https://github.com/cloudposse/terraform-aws-route53-cluster-hostname.git?ref=tags/0.2.6"
+  source    = "git::https://github.com/cloudposse/terraform-aws-route53-cluster-hostname.git?ref=tags/0.3.0"
+#   source    = "git::https://github.com/cloudposse/terraform-aws-route53-cluster-hostname.git?ref=tags/0.2.6"
   enabled   = var.enabled == "true" && length(var.zone_id) > 0 ? "true" : "false"
   namespace = var.namespace
   name      = local.reader_dns_name
