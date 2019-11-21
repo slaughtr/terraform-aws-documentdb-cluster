@@ -12,7 +12,7 @@ terraform {
 }
 
 resource "aws_security_group" "default" {
-  count       = var.enabled == "true" ? 1 : 0
+  count       = var.enabled == true ? 1 : 0
   name        = "${var.name}-sg"
   description = "Security Group for DocumentDB cluster"
   vpc_id      = var.vpc_id
@@ -20,7 +20,7 @@ resource "aws_security_group" "default" {
 }
 
 resource "aws_security_group_rule" "egress" {
-  count             = var.enabled == "true" ? 1 : 0
+  count             = var.enabled == true ? 1 : 0
   type              = "egress"
   description       = "Allow all egress traffic"
   from_port         = 0
@@ -47,7 +47,7 @@ resource "aws_security_group_rule" "ingress_security_groups" {
 
 resource "aws_security_group_rule" "ingress_cidr_blocks" {
   type              = "ingress"
-  count             = var.enabled == "true" && length(var.allowed_cidr_blocks) > 0 ? 1 : 0
+  count             = var.enabled == true && length(var.allowed_cidr_blocks) > 0 ? 1 : 0
   description       = "Allow inbound traffic from CIDR blocks"
   from_port         = var.db_port
   to_port           = var.db_port
@@ -57,7 +57,7 @@ resource "aws_security_group_rule" "ingress_cidr_blocks" {
 }
 
 resource "aws_docdb_cluster" "default" {
-  count                           = var.enabled == "true" ? 1 : 0
+  count                           = var.enabled == true ? 1 : 0
   cluster_identifier              = var.name
   master_username                 = var.master_username
   master_password                 = var.master_password
@@ -79,7 +79,7 @@ resource "aws_docdb_cluster" "default" {
 }
 
 resource "aws_docdb_cluster_instance" "default" {
-  count              = var.enabled == "true" ? var.cluster_size : 0
+  count              = var.enabled == true ? var.cluster_size : 0
   identifier         = "${var.name}${count.index > 0 ? "-${count.index}" : ""}"
   cluster_identifier = join("", aws_docdb_cluster.default.*.id)
   apply_immediately  = var.apply_immediately
@@ -89,7 +89,7 @@ resource "aws_docdb_cluster_instance" "default" {
 }
 
 resource "aws_docdb_subnet_group" "default" {
-  count       = var.enabled == "true" ? 1 : 0
+  count       = var.enabled == true ? 1 : 0
   name        = "${var.name}-subnet-group"
   description = "Allowed subnets for DB cluster instances"
   subnet_ids  = var.subnet_ids
@@ -98,7 +98,7 @@ resource "aws_docdb_subnet_group" "default" {
 
 # https://docs.aws.amazon.com/documentdb/latest/developerguide/db-cluster-parameter-group-create.html
 resource "aws_docdb_cluster_parameter_group" "default" {
-  count       = var.enabled == "true" ? 1 : 0
+  count       = var.enabled == true ? 1 : 0
   name        = "${var.name}-parameter-group"
   description = "DB cluster parameter group"
   family      = var.cluster_family
@@ -114,7 +114,7 @@ locals {
 
 module "dns_master" {
   source    = "git::https://github.com/cloudposse/terraform-aws-route53-cluster-hostname.git?ref=tags/0.3.0"
-  enabled   = var.enabled && length(var.zone_id) > 0 ? "true" : "false"
+  enabled   = var.enabled && length(var.zone_id) > 0 ? true : "false"
   name      = local.cluster_dns_name
   zone_id   = var.zone_id
   records   = coalescelist(aws_docdb_cluster.default.*.endpoint, [""])
@@ -122,7 +122,7 @@ module "dns_master" {
 
 module "dns_replicas" {
   source    = "git::https://github.com/cloudposse/terraform-aws-route53-cluster-hostname.git?ref=tags/0.3.0"
-  enabled   = var.enabled && length(var.zone_id) > 0 ? "true" : "false"
+  enabled   = var.enabled && length(var.zone_id) > 0 ? true : "false"
   name      = local.reader_dns_name
   zone_id   = var.zone_id
   records   = coalescelist(aws_docdb_cluster.default.*.reader_endpoint, [""])
