@@ -11,23 +11,12 @@ terraform {
   required_version = ">= 0.12.0"
 }
 
-module "label" {
-  source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.7.0"
-  namespace  = var.namespace
-  name       = var.name
-  stage      = var.stage
-  delimiter  = var.delimiter
-  attributes = var.attributes
-  tags       = var.tags
-  enabled    = var.enabled
-}
-
 resource "aws_security_group" "default" {
   count       = var.enabled == "true" ? 1 : 0
-  name        = module.label.id
+  name        = "${var.name}-sg"
   description = "Security Group for DocumentDB cluster"
   vpc_id      = var.vpc_id
-  tags        = module.label.tags
+  tags        = var.tags
 }
 
 resource "aws_security_group_rule" "egress" {
@@ -74,7 +63,7 @@ resource "aws_docdb_cluster" "default" {
   master_password                 = var.master_password
   backup_retention_period         = var.retention_period
   preferred_backup_window         = var.preferred_backup_window
-  final_snapshot_identifier       = lower(module.label.id)
+  final_snapshot_identifier       = "${var.name}-final-snapshot"
   skip_final_snapshot             = var.skip_final_snapshot
   apply_immediately               = var.apply_immediately
   storage_encrypted               = var.storage_encrypted
@@ -86,7 +75,7 @@ resource "aws_docdb_cluster" "default" {
   engine                          = var.engine
   engine_version                  = var.engine_version
   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
-  tags                            = module.label.tags
+  tags                            = var.tags
 }
 
 resource "aws_docdb_cluster_instance" "default" {
@@ -95,22 +84,22 @@ resource "aws_docdb_cluster_instance" "default" {
   cluster_identifier = join("", aws_docdb_cluster.default.*.id)
   apply_immediately  = var.apply_immediately
   instance_class     = var.instance_class
-  tags               = module.label.tags
+  tags               = var.tags
   engine             = var.engine
 }
 
 resource "aws_docdb_subnet_group" "default" {
   count       = var.enabled == "true" ? 1 : 0
-  name        = module.label.id
+  name        = "${var.name}-subnet-group"
   description = "Allowed subnets for DB cluster instances"
   subnet_ids  = var.subnet_ids
-  tags        = module.label.tags
+  tags        = var.tags
 }
 
 # https://docs.aws.amazon.com/documentdb/latest/developerguide/db-cluster-parameter-group-create.html
 resource "aws_docdb_cluster_parameter_group" "default" {
   count       = var.enabled == "true" ? 1 : 0
-  name        = module.label.id
+  name        = "${var.name}-parameter-group"
   description = "DB cluster parameter group"
   family      = var.cluster_family
   dynamic "parameter" {
@@ -126,7 +115,7 @@ resource "aws_docdb_cluster_parameter_group" "default" {
       value        = parameter.value.value
     }
   }
-  tags = module.label.tags
+  tags = var.tags
 }
 
 locals {
