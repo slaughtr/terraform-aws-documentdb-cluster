@@ -42,11 +42,11 @@ resource "aws_security_group_rule" "egress" {
 }
 
 locals {
-  allowed_security_groups = [split(",", join(",", var.allowed_security_groups))]
+  allowed_security_groups = var.allowed_security_groups
 }
 
 resource "aws_security_group_rule" "ingress_security_groups" {
-  count                    = var.allowed_security_groups_length
+  count                    = length(var.allowed_security_groups)
   type                     = "ingress"
   description              = "Allow inbound traffic from existing Security Groups"
   from_port                = var.db_port
